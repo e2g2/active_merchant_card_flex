@@ -21,4 +21,8 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'activemerchant', '> 1.10.0'
   s.add_dependency 'activesupport', '> 2.3.5'
+  s.add_dependency 'money'
+
+  s.add_development_dependency 'actionpack'
+  s.add_development_dependency 'mocha'
 end
