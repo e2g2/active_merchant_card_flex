@@ -1,0 +1,3 @@
+module ActiveMerchantCardFlex
+  # Your code goes here...
+end
