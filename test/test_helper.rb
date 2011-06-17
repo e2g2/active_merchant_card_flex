@@ -38,6 +38,7 @@ rescue LoadError
   require 'action_controller/test_process'
 end
 require 'active_merchant/billing/integrations/action_view_helper'
+require 'active_merchant_card_flex'
 
 ActiveMerchant::Billing::Base.mode = :test
 

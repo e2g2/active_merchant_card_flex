@@ -1,3 +1,2 @@
-module ActiveMerchantCardFlex
-  # Your code goes here...
-end
+require 'active_merchant'
+require 'active_merchant/billing/gateways/card_flex.rb'

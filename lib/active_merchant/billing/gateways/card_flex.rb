@@ -56,7 +56,9 @@ module ActiveMerchant
       # * <tt>options</tt> -- A hash of optional parameters
       def capture(money, authorization, options = {})
         post            = {}
-        post[:postonly] = authorization
+
+        # remove last 4 digits of cc number as they are not required here
+        post[:postonly] = authorization[0...-4]
 
         commit(post[:userprofileid] ? :profile_sale : :ns_quicksale_cc, money, post)
       end
@@ -128,7 +130,7 @@ module ActiveMerchant
       # * <tt>authorization</tt> - The authorization returned from the previous authorize request. (REQUIRED)
       # * <tt>options</tt> -- A hash of optional parameters
       def void(authorization, options = {})
-        commit(:ns_void, nil, options.merge(:historykeyid => authorization, :last4digits => "5454"))
+        commit(:ns_void, nil, options.merge(:historykeyid => authorization[0...-4], :last4digits => authorization[-4..-1]))
       end
 
       private
@@ -184,7 +186,7 @@ module ActiveMerchant
 
           Response.new(response[:result] == "1", response[:message], response,
             :avs_result     => { :code => response[:avs_result] },
-            :authorization  => response[:historyid],
+            :authorization  => response[:authorization],
             :cvv_result     => response[:cvv_result],
             :test           => test_mode
           )
@@ -215,8 +217,13 @@ module ActiveMerchant
             response[:cvv_result]         = approval_response[7]
             response[:partial_auth]       = approval_response[8]
 
-            # set stored credit card id and append last 4 digits of card number
-            response[:creditcard_id]      = "#{response.delete(:userprofileid)}#{response[:accountnumber][-4..-1]}" if response[:userprofileid] && response[:accountnumber]
+            # if a stored profile was added use its id for authorization otherwise
+            # use the historyid, and append the last4digits of the card number so
+            # that it does not have to be passed in, making it more compliant to
+            # ActiveMerchant
+            if response[:accountnumber]
+              response[:authorization] = "#{response[:transaction_type] == 'PROFILEADD' || response[:partial_auth] == 'DUPLICATE' ? response[:userprofileid] : response[:historyid]}#{response[:accountnumber][-4..-1]}"
+            end
           else
             decline_response              = response[:reason].split(":")
             response[:transaction_result] = decline_response[0]
