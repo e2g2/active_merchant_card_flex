@@ -82,7 +82,7 @@ class RemoteCardFlexTest < Test::Unit::TestCase
     assert_equal 'Accepted', store.message
 
     # wait a few seconds before charging a profile
-    sleep 10
+    sleep 15
     assert purchase = @gateway.purchase(@amount, store.authorization, @options)
     assert_success purchase
     assert_equal 'Accepted', purchase.message
